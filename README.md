@@ -147,6 +147,21 @@ entities:
       - light.kitchen_lights
 ```
 
+- Setting `hide_chevron:` to true will hide the right arrow (you can still expand a row by clicking on it):
+```yaml
+type: entities
+entities:
+  - type: custom:fold-entity-row
+    head:
+      type: section
+      label: open
+    hide_chevron: true
+    entities:
+      - light.bed_light
+      - light.ceiling_lights
+      - light.kitchen_lights
+```
+
 ![options](https://user-images.githubusercontent.com/1299821/59793730-8ba54980-92d7-11e9-894b-50d8a437638a.png)
 
 - If the header or any row in the group has the following tap-, hold- or double-tap-action defined, it will toggle the fold open or closed:
