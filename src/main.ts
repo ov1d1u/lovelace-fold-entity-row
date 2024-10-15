@@ -11,6 +11,7 @@ interface LovelaceElement extends HTMLElement {
 interface FoldEntityRowConfig {
   type: string;
   open: boolean;
+  hide_chevron: boolean;
   entity?: any;
   head?: any;
   items?: any[];
@@ -24,6 +25,7 @@ interface FoldEntityRowConfig {
 
 const DEFAULT_CONFIG = {
   open: false,
+  hide_chevron: false,
   padding: 24,
   group_config: {},
   tap_unfold: undefined,
@@ -36,6 +38,7 @@ function ensureObject(config: any) {
 
 class FoldEntityRow extends LitElement {
   @property() open: boolean;
+  @property() hideChevron: boolean;
   @property() head?: LovelaceElement;
   @property() rows?: LovelaceElement[];
   @property() entitiesWarning = false;
@@ -46,6 +49,7 @@ class FoldEntityRow extends LitElement {
   setConfig(config: FoldEntityRowConfig) {
     this._config = config = Object.assign({}, DEFAULT_CONFIG, config);
     this.open = this.open ?? this._config.open ?? false;
+    this.hideChevron = this.hideChevron ?? this._config.hide_chevron ?? false;
 
     this._finishSetup();
   }
@@ -134,6 +138,7 @@ class FoldEntityRow extends LitElement {
         if (el) el.style.marginRight = "-48px";
       } else {
         this.classList.remove("section-head");
+        this.style.maxWidth = this.hideChevron ? "" : "calc(100% - var(--toggle-icon-width))";
       }
     }
     await customElements.whenDefined("card-mod");
@@ -210,22 +215,26 @@ class FoldEntityRow extends LitElement {
   render() {
     return html`
       <div id="head" @ll-custom=${this._customEvent} ?open=${this.open}>
-        ${this.head}
-        <ha-icon
-          icon=${this.open ? "mdi:chevron-up" : "mdi:chevron-down"}
-          @action=${this.toggle}
-          .actionHandler=${actionHandler({})}
-          role="${this._config.clickable ? "" : "switch"}"
-          tabindex="${this._config.clickable ? "-1" : "0"}"
-          aria-checked=${this.open ? "true" : "false"}
-          aria-label="${this._config.clickable
-            ? ""
-            : this.open
-            ? "Toggle fold closed"
-            : "Toggle fold open"}"
-        ></ha-icon>
+      ${this.head}
+        ${!this.hideChevron
+          ? html`
+              <ha-icon
+                icon=${this.open ? "mdi:chevron-up" : "mdi:chevron-down"}
+                @action=${this.toggle}
+                .actionHandler=${actionHandler({})}
+                role="${this._config.clickable ? "" : "switch"}"
+                tabindex="${this._config.clickable ? "-1" : "0"}"
+                aria-checked=${this.open ? "true" : "false"}
+                aria-label="${this._config.clickable
+                  ? ""
+                  : this.open
+                  ? "Toggle fold closed"
+                  : "Toggle fold open"}"
+              ></ha-icon>
+            `
+          : ""}
       </div>
-
+  
       <div
         id="items"
         ?open=${this.open}
@@ -249,7 +258,6 @@ class FoldEntityRow extends LitElement {
       }
       #head :not(ha-icon) {
         flex-grow: 1;
-        max-width: calc(100% - var(--toggle-icon-width));
       }
       ha-icon {
         width: var(--toggle-icon-width);
